@@ -50,18 +50,19 @@ export default {
         password,
       });
 
-      res.status(200).json({
+      return res.status(200).json({
         message: "Success Registration",
         data: result,
       });
     } catch (error) {
       const err = error as unknown as Error;
-      res.status(400).json({
+      return res.status(400).json({
         message: err.message,
         data: null,
       });
     }
   },
+
   async login(req: Request, res: Response) {
     const { identifier, password } = req.body as unknown as TLogin;
 
@@ -78,7 +79,7 @@ export default {
       });
 
       if (!userByIdentifier) {
-        res.status(403).json({
+        return res.status(403).json({
           message: "User not found",
           data: null,
         });
@@ -88,7 +89,7 @@ export default {
         encrypt(password) === userByIdentifier!.password;
 
       if (!validatePassword) {
-        res.status(403).json({
+        return res.status(403).json({
           message: "User not found",
           data: null,
         });
@@ -99,30 +100,31 @@ export default {
         role: userByIdentifier!.role,
       });
 
-      res.status(200).json({
+      return res.status(200).json({
         message: "Login Successfully",
         data: token,
       });
     } catch (error) {
       const err = error as unknown as Error;
-      res.status(400).json({
+      return res.status(400).json({
         message: err.message,
         data: null,
       });
     }
   },
+
   async me(req: IRequestUser, res: Response) {
     try {
       const user = req.user;
       const result = await UserModel.findById(user?.id);
 
-      res.status(200).json({
+      return res.status(200).json({
         message: "Success",
         data: result,
       });
     } catch (error) {
       const err = error as unknown as Error;
-      res.status(400).json({
+      return res.status(400).json({
         message: err.message,
         data: null,
       });

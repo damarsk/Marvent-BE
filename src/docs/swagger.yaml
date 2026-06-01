@@ -1,0 +1,150 @@
+openapi: 3.0.0
+info:
+  title: Marvent-BE API
+  version: 1.0.0
+  description: API documentation for the Marvent backend (authentication endpoints)
+
+servers:
+  - url: http://localhost:3000
+    description: Local development server
+
+tags:
+  - name: Auth
+
+paths:
+  /api/auth/register:
+    post:
+      tags: [Auth]
+      summary: Register a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterRequest"
+      responses:
+        "200":
+          description: Success Registration
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseUser"
+        "400":
+          description: Bad request
+
+  /api/auth/login:
+    post:
+      tags: [Auth]
+      summary: Login a user (by email or username)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+      responses:
+        "200":
+          description: Login Successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseAuth"
+        "400":
+          description: Bad request
+        "403":
+          description: Forbidden (invalid credentials)
+
+  /api/auth/me:
+    get:
+      tags: [Auth]
+      summary: Get current user information
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseUser"
+        "401":
+          description: Unauthorized
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    RegisterRequest:
+      type: object
+      required: [fullName, username, email, password, confirmPassword]
+      properties:
+        fullName:
+          type: string
+        username:
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+        confirmPassword:
+          type: string
+
+    LoginRequest:
+      type: object
+      required: [identifier, password]
+      properties:
+        identifier:
+          type: string
+          description: Email or username
+        password:
+          type: string
+
+    User:
+      type: object
+      properties:
+        _id:
+          type: string
+        fullName:
+          type: string
+        username:
+          type: string
+        email:
+          type: string
+        role:
+          type: string
+          enum: [admin, user]
+        profilePicture:
+          type: string
+        isActive:
+          type: boolean
+        activationCode:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    ApiResponseUser:
+      type: object
+      properties:
+        message:
+          type: string
+        data:
+          oneOf:
+            - $ref: "#/components/schemas/User"
+            - type: object
+
+    ApiResponseAuth:
+      type: object
+      properties:
+        message:
+          type: string
+        data:
+          type: string
+          description: JWT token string
