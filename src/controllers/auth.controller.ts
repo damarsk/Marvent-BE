@@ -23,7 +23,27 @@ const registerValidateSchema = Yup.object({
   fullName: Yup.string().required(),
   username: Yup.string().required(),
   email: Yup.string().required(),
-  password: Yup.string().required(),
+  password: Yup.string()
+    .required()
+    .min(6, "Password must be at least 6 characters")
+    .test(
+      "at-least-one-uppercase",
+      "Password must contain at least one uppercase letter",
+      (value) => {
+        if (!value) return false;
+        const regex = /^(?=.*[A-Z])/;
+        return regex.test(value);
+      },
+    )
+    .test(
+      "at-least-one-number",
+      "Password must contain at least one number",
+      (value) => {
+        if (!value) return false;
+        const regex = /^(?=.*\d)/;
+        return regex.test(value);
+      },
+    ),
   confirmPassword: Yup.string()
     .required()
     .oneOf([Yup.ref("password"), ""], "Password must be match"),
@@ -76,6 +96,7 @@ export default {
             username: identifier,
           },
         ],
+        isActive: true,
       });
 
       if (!userByIdentifier) {
@@ -121,6 +142,34 @@ export default {
       return res.status(200).json({
         message: "Success",
         data: result,
+      });
+    } catch (error) {
+      const err = error as unknown as Error;
+      return res.status(400).json({
+        message: err.message,
+        data: null,
+      });
+    }
+  },
+
+  async activation(req: Request, res: Response) {
+    try {
+      const { code } = req.body as { code: string };
+
+      const user = await UserModel.findOneAndUpdate(
+        {
+          activationCode: code,
+        },
+        {
+          isActive: true,
+        },
+        {
+          new: true,
+        },
+      );
+      return res.status(200).json({
+        message: "Account activated successfully",
+        data: user,
       });
     } catch (error) {
       const err = error as unknown as Error;

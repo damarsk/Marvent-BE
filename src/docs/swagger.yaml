@@ -70,6 +70,26 @@ paths:
         "401":
           description: Unauthorized
 
+  /api/auth/activation:
+    post:
+      tags: [Auth]
+      summary: Activate user account using activation code
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ActivationRequest"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseUser"
+        "400":
+          description: Bad request
+
 components:
   securitySchemes:
     bearerAuth:
@@ -101,6 +121,13 @@ components:
           type: string
           description: Email or username
         password:
+          type: string
+
+    ActivationRequest:
+      type: object
+      required: [code]
+      properties:
+        code:
           type: string
 
     User:
